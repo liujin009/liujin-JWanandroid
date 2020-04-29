@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'android-aspectjx'    //插件
 
 android {
     compileSdkVersion rootProject.ext.android["compileSdkVersion"]
@@ -11,17 +12,17 @@ android {
     }
 
     defaultConfig {
-        applicationId "pers.zjc.wanandroid"
+        applicationId rootProject.ext.android[applicationId]
         minSdkVersion rootProject.ext.android["minSdkVersion"]
         targetSdkVersion rootProject.ext.android["targetSdkVersion"]
         versionCode rootProject.ext.android["versionCode"]
         versionName rootProject.ext.android["versionName"]
         testInstrumentationRunner rootProject.ext.dependencies["androidJUnitRunner"]
 
-        ndk {
-            //设置支持的SO库架构
-            abiFilters 'armeabi' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
-        }
+//        ndk {
+//            //设置支持的SO库架构
+//            abiFilters 'armeabi' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+//        }
     }
 
     signingConfigs {
@@ -83,8 +84,6 @@ dependencies {
     annotationProcessor(rootProject.ext.dependencies["butterknife-compiler"]) {
         exclude module: 'support-annotations'
     }
-    implementation rootProject.ext.dependencies["paginate"]
-
     //arms
     implementation project(':arms')
     // module
@@ -96,7 +95,8 @@ dependencies {
 
     //现在已经将 Demo 中的屏幕适配框架从 AndroidAutoLayout 替换为 AndroidAutoSize, AndroidAutoLayout 和 AndroidAutoSize 可以在项目中共存
     //所以旧项目只要依赖 arms-autolayout 即可兼容之前的旧页面, 新页面可以使用 AndroidAutoSize 进行适配, 等有时间了再将旧页面全部替换为 AndroidAutoSize
-    implementation rootProject.ext.dependencies["autosize"]
+    //不想适配就不要依赖
+//    implementation rootProject.ext.dependencies["autosize"]
 
     //Arms 核心库不再包含 Glide, 想使用其他图片加载框架或者想自行扩展 ImageLoaderStrategy 就不要依赖 arms-imageloader-glide
     //依赖 arms-imageloader-glide 后还需要在 GlobalConfiguration 中手动注册 GlideImageLoaderStrategy
@@ -111,9 +111,11 @@ dependencies {
     implementation rootProject.ext.dependencies["AnyLayer"]
     implementation rootProject.ext.dependencies["flexBox"]
     implementation rootProject.ext.dependencies["flycoTabLayout"]
-    implementation rootProject.ext.dependencies["BasePopup"]
-    implementation rootProject.ext.dependencies["BasePopupSupport"]
     implementation rootProject.ext.dependencies["CircleImageView"]
+    implementation rootProject.ext.dependencies["LikeButton"]
+    implementation rootProject.ext.dependencies["multipleStatusView"]
+    implementation rootProject.ext.dependencies["AVLoading"]
+
     //沉浸式
     implementation rootProject.ext.dependencies["immersionbar-base"]
     implementation rootProject.ext.dependencies["immersionbar-fragment"]
@@ -127,10 +129,13 @@ dependencies {
     implementation rootProject.ext.dependencies["rxjava2"]
     implementation rootProject.ext.dependencies["retrofit-adapter-rxjava2"]
     implementation rootProject.ext.dependencies["rxpermissions2"]
+    implementation rootProject.ext.dependencies["AutoDispose"]
+    implementation rootProject.ext.dependencies["AutoDispose-components"]
 
     // network
     implementation rootProject.ext.dependencies["retrofit"]
     implementation rootProject.ext.dependencies["retrofit-converter-gson"]
+    implementation rootProject.ext.dependencies["retrofit-converter-scalars"]
     implementation rootProject.ext.dependencies["okhttp3"]
     implementation rootProject.ext.dependencies["logging-interceptor"]
 
@@ -156,6 +161,12 @@ dependencies {
     // 今日诗词
     implementation rootProject.ext.dependencies["jinrishici"]
 
+    // 适配
+//    implementation rootProject.ext.dependencies["autosize"]
 
+    // jsoup 解析网页
+    implementation "org.jsoup:jsoup:1.9.2"
+
+    implementation 'org.aspectj:aspectjrt:1.8.9'
 
 }

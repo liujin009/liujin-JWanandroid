@@ -2,6 +2,8 @@ package pers.jay.wanandroid.mvp.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +19,7 @@ import com.jess.arms.utils.ArmsUtils;
 import com.scwang.smartrefresh.header.StoreHouseHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +35,7 @@ import pers.jay.wanandroid.mvp.presenter.NavPresenter;
 import pers.jay.wanandroid.mvp.ui.activity.X5WebActivity;
 import pers.jay.wanandroid.mvp.ui.adapter.NaviAdapter;
 import pers.jay.wanandroid.utils.RvScrollTopUtils;
+import pers.jay.wanandroid.utils.SmartRefreshUtils;
 import pers.zjc.commonlibs.util.ToastUtils;
 
 import static com.jess.arms.utils.Preconditions.checkNotNull;
@@ -68,6 +72,7 @@ public class NavFragment extends BaseLazyLoadFragment<NavPresenter>
     @Override
     public void initData(@Nullable Bundle savedInstanceState) {
         loadView();
+        mPresenter.requestNavData();
     }
 
     private void loadView() {
@@ -83,13 +88,9 @@ public class NavFragment extends BaseLazyLoadFragment<NavPresenter>
     }
 
     private void initRefreshLayout() {
-        StoreHouseHeader header = new StoreHouseHeader(mContext);
-        header.initWithString(getString(R.string.app_name));
-        refreshLayout.setRefreshHeader(header);
-        refreshLayout.setEnableLoadMore(false);
-        refreshLayout.setEnableAutoLoadMore(false);
-        refreshLayout.setEnableRefresh(false);
-//        refreshLayout.setOnRefreshListener(refreshLayout -> mPresenter.requestNavData());
+        SmartRefreshUtils.with(refreshLayout)
+                         .pureScrollMode()
+                         .setRefreshListener(() -> mPresenter.requestNavData());
     }
 
     private void switchToWebActivity(Article data) {
@@ -98,8 +99,6 @@ public class NavFragment extends BaseLazyLoadFragment<NavPresenter>
         intent.putExtra(Const.Key.KEY_WEB_PAGE_DATA, data);
         launchActivity(intent);
     }
-
-
 
     @Override
     public void setData(@Nullable Object data) {
@@ -148,6 +147,11 @@ public class NavFragment extends BaseLazyLoadFragment<NavPresenter>
     @Override
     public void scrollToTop() {
         RvScrollTopUtils.smoothScrollTop(recyclerView);
+    }
+
+    @Override
+    public void scrollToTopRefresh() {
+        lazyLoadData();
     }
 
     @Override

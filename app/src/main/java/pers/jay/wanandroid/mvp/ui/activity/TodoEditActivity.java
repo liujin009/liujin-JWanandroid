@@ -41,7 +41,6 @@ import pers.zjc.commonlibs.util.ToastUtils;
 
 import static com.jess.arms.utils.Preconditions.checkNotNull;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
 public class TodoEditActivity extends BaseActivity<TodoEditPresenter>
         implements TodoEditContract.View {
 
@@ -90,7 +89,11 @@ public class TodoEditActivity extends BaseActivity<TodoEditPresenter>
 
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
-        DaggerTodoEditComponent.builder().appComponent(appComponent).view(this).build().inject(this);
+        DaggerTodoEditComponent.builder()
+                               .appComponent(appComponent)
+                               .view(this)
+                               .build()
+                               .inject(this);
     }
 
     @Override
@@ -133,7 +136,7 @@ public class TodoEditActivity extends BaseActivity<TodoEditPresenter>
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                       killMyself();
+                        killMyself();
                     }
                 }, null).show();
     }
@@ -146,7 +149,7 @@ public class TodoEditActivity extends BaseActivity<TodoEditPresenter>
         etDate.setFocusable(false);
         etDate.setOnClickListener(v -> chooseDeadLine());
         rlPriority.setOnClickListener(v -> changePriority());
-//        switchPriority.setOnCheckedChangeListener((buttonView, isChecked) -> changePriority());
+        //        switchPriority.setOnCheckedChangeListener((buttonView, isChecked) -> changePriority());
         btCommit.setOnClickListener(v -> commitTodo());
     }
 
@@ -182,7 +185,7 @@ public class TodoEditActivity extends BaseActivity<TodoEditPresenter>
     private void configTextWatcher() {
         CommonTextWatcher etTitleWatcher = new CommonTextWatcher() {
             @Override
-            public void textChanged(Editable s) {
+            public void afterTextChanged(Editable s) {
                 if (!StringUtils.equals(s.toString(), etTitle.getText().toString())) {
                     hasChanged = true;
                 }
@@ -191,7 +194,7 @@ public class TodoEditActivity extends BaseActivity<TodoEditPresenter>
         };
         CommonTextWatcher etContentWatcher = new CommonTextWatcher() {
             @Override
-            public void textChanged(Editable s) {
+            public void afterTextChanged(Editable s) {
                 if (!StringUtils.equals(s.toString(), etContent.getText().toString())) {
                     hasChanged = true;
                 }
@@ -221,8 +224,10 @@ public class TodoEditActivity extends BaseActivity<TodoEditPresenter>
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, year, month, dayOfMonth) -> {
                     month++;
-//                        showMessage(String.format("选择了%s年%s月%s日", year, month, dayOfMonth));
-                    String dateStr = String.format("%s-%s-%s", year, month >= 10 ? month : "0" + month, dayOfMonth >= 10 ? dayOfMonth : "0" + dayOfMonth);
+                    //                        showMessage(String.format("选择了%s年%s月%s日", year, month, dayOfMonth));
+                    String dateStr = String.format("%s-%s-%s", year,
+                            month >= 10 ? month : "0" + month,
+                            dayOfMonth >= 10 ? dayOfMonth : "0" + dayOfMonth);
                     if (!StringUtils.equals(dateStr, mData.getDateStr())) {
                         hasChanged = true;
                     }

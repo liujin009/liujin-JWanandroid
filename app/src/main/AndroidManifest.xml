@@ -12,37 +12,42 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
-        tools:replace="android:allowBackup,android:label"
+        tools:replace="android:allowBackup,android:label,android:appComponentFactory"
+        android:appComponentFactory="any words"
         tools:targetApi="p">
-        <activity android:name="pers.zjc.commonlibs.util.PermissionUtils$PermissionActivity"/>
+        <activity android:name="pers.zjc.commonlibs.util.PermissionUtils$PermissionActivity"
+            android:configChanges="keyboard|keyboardHidden|screenSize|fontScale|density|orientation|uiMode"/>
         <activity android:name=".mvp.ui.activity.SettingsActivity"
-            />
+            android:configChanges="keyboard|keyboardHidden|screenSize|fontScale|density|orientation|uiMode"
+           />
         <activity
             android:name=".mvp.ui.activity.X5WebActivity"
+            android:configChanges="keyboard|keyboardHidden|screenSize|fontScale|density|orientation|uiMode"
             android:launchMode="singleTop" />
         <activity
             android:name=".mvp.ui.activity.SearchActivity"
+            android:configChanges="keyboard|keyboardHidden|screenSize|fontScale|density|orientation|uiMode"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateVisible|adjustResize" />
         <activity
             android:name=".mvp.ui.activity.TabActivity"
+            android:configChanges="keyboard|keyboardHidden|screenSize|fontScale|density|orientation|uiMode"
             android:launchMode="singleTop" />
         <activity
             android:name=".mvp.ui.activity.WebActivity"
+            android:configChanges="keyboard|keyboardHidden|screenSize|fontScale|density|orientation|uiMode"
             android:launchMode="singleTop"
-            android:screenOrientation="fullSensor"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".mvp.ui.activity.TodoEditActivity"
+            android:configChanges="keyboard|keyboardHidden|screenSize|fontScale|density|orientation|uiMode"
             android:launchMode="singleTop"
             android:screenOrientation="fullSensor"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
         <activity
             android:name=".mvp.ui.activity.MainActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="fullSensor"
             android:theme="@style/LaunchTheme"
-            android:configChanges="uiMode"
+            android:configChanges="keyboard|keyboardHidden|screenSize|fontScale|density|orientation|uiMode"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -63,12 +68,12 @@
         只要填写完设计图的尺寸, AutoSize 就会自动启动, 以下 dp 尺寸是根据公式 px / (dpi / 160) 求出, 运算时使用测试机的 dpi 即可
         AutoSize 的详细介绍请看这里 https://juejin.im/post/5bce688e6fb9a05cf715d1c2
         -->
-        <meta-data
-            android:name="design_width_in_dp"
-            android:value="360" />
-        <meta-data
-            android:name="design_height_in_dp"
-            android:value="640" /> <!-- (bugly)注意：如果您想兼容Android N或者以上的设备，必须要在AndroidManifest.xml文件中配置FileProvider来访问共享路径的文件。 -->
+<!--        <meta-data-->
+<!--            android:name="design_width_in_dp"-->
+<!--            android:value="1080" />-->
+<!--        <meta-data-->
+<!--            android:name="design_height_in_dp"-->
+<!--            android:value="1920" /> &lt;!&ndash; (bugly)注意：如果您想兼容Android N或者以上的设备，必须要在AndroidManifest.xml文件中配置FileProvider来访问共享路径的文件。 &ndash;&gt;-->
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileProvider"

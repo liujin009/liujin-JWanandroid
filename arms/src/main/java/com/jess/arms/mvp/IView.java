@@ -75,4 +75,19 @@ public interface IView {
     default void killMyself() {
 
     }
+
+    /**
+     * 显示错误
+     * @param msg
+     */
+    default void showError(String msg) {
+
+    }
+
+    /**
+     * 显示无网络
+     */
+    default void showNoNetwork() {
+
+    }
 }

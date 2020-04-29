@@ -4,12 +4,12 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorPrimary</item>
         <!--<item name="android:windowBackground">@color/colorPrimary</item>-->
-<!--        <item name="android:windowAnimationStyle">@style/Animation_Activity</item>-->
+        <item name="android:windowAnimationStyle">@style/Animation_Activity</item>
         <item name="android:windowTranslucentStatus">true</item>
     </style>
-
+    
     <style name="Animation_Activity" parent="@android:style/Animation.Translucent">
         <item name="android:activityOpenEnterAnimation">@anim/translate_right_to_center</item>
         <item name="android:activityOpenExitAnimation">@anim/translate_center_to_left</item>
@@ -24,11 +24,12 @@
     
     <!--  启动页主题  -->
     <style name="LaunchTheme" parent="AppTheme">       
+        <item name="android:windowBackground">@drawable/launch_screen</item>
         <item name="android:windowNoTitle">true</item>//无标题
-<!--        <item name="android:windowActionBar">false</item>//无ActionBar-->
+        <!--        <item name="android:windowActionBar">false</item>//无ActionBar-->
         <item name="android:windowFullscreen">true</item>//全屏即无通知栏
         <item name="android:windowContentOverlay">@null</item>//是否有遮盖
-        <item name="android:windowBackground">@drawable/launch_screen</item>
+        
         <item name="android:animation">@anim/anim_launcher</item>
     </style>
     
@@ -50,7 +51,7 @@
     </style>
     
     <!--  按钮圆形波纹效果，通过theme属性引入,且其中重要属性android:background要设置为无边界的波纹  -->
-    <style name="RippleWhite">
+    <style name="RippleButton">
         <!--点击后波纹的颜色-->
         <item name="android:colorControlHighlight">#FAFAFA</item>
         <!--效果半径-->
@@ -60,17 +61,17 @@
     
     <!--  recyclerView  -->
     <style name="RecyclerViewStyle">
-        <item name="android:scrollbarThumbVertical">@color/colorPrimary</item>
-<!--        <item name="android:scrollbarTrackVertical">@color/colorPrimary</item>-->
-<!--        <item name="android:paddingLeft">@dimen/dp_10</item>-->
-<!--        <item name="android:paddingRight">@dimen/dp_10</item>-->
+        <item name="android:scrollbarThumbVertical">@color/color_line_divider</item>
+        <!--        <item name="android:scrollbarTrackVertical">@color/colorPrimary</item>-->
+        <!--        <item name="android:paddingLeft">@dimen/dp_10</item>-->
+        <!--        <item name="android:paddingRight">@dimen/dp_10</item>-->
         <item name="android:scrollbarSize">@dimen/dp_3</item>
         <item name="android:overScrollMode">ifContentScrolls</item>
         <item name="android:scrollbars">vertical</item>
         <item name="android:scrollbarStyle">outsideOverlay</item>
         <item name="android:background">@color/trans</item>
     </style>
-
+    
     <!-- 圆形progressBar样式   -->
     <style name="CircleProgressBar">
         <item name="android:color">@color/colorPrimary</item>
@@ -79,9 +80,9 @@
     <!-- searchEditTextTheme -->
     <style name="searchEditTextTheme" parent="Widget.AppCompat.EditText">
         <item name="android:background">@drawable/bg_edit_text_search</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:colorAccent">@color/white</item>
-        <item name="android:colorPrimary">@color/white</item>
+        <item name="android:textColorPrimary">@color/text_color_base</item>
+        <item name="android:colorAccent">@color/colorPrimaryDark</item>
+        <item name="android:colorPrimary">@color/colorPrimary</item>
     </style>
     
     <style name="dialog_date">
@@ -105,9 +106,21 @@
         <item name="android:backgroundDimAmount">0.6</item>
         
         <!--<!–背景色  如果除去背景色 @null –>-->
-<!--        <item name="android:windowBackground">@null</item>-->
+        <!--        <item name="android:windowBackground">@null</item>-->
         <!--按钮字体的颜色-->
         <!--<item name="android:textColor">@color/dark_2B</item>-->
     </style>
     
+    <!--多状态视图-->
+    <style name="MultiStatusViewStyle">
+        <item name="emptyView">@layout/layout_empty_view</item>
+        <item name="errorView">@layout/layout_error_view</item>
+        <item name="loadingView">@layout/layout_loading_view</item>
+        <item name="noNetworkView">@layout/layout_no_network_view</item>
+    </style>
+    
+    <!--菜单style-->
+    <style name="MenuStyle" parent="Widget.Design.NavigationView">
+        <item name="android:actionMenuTextColor">@color/text_color_reverse</item>
+    </style>
 </resources>

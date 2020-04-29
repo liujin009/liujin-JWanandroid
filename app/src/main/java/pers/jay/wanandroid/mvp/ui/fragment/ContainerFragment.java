@@ -7,16 +7,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -46,7 +43,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import org.simple.eventbus.Subscriber;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -77,7 +74,7 @@ import pers.jay.wanandroid.utils.UIUtils;
 import pers.jay.wanandroid.utils.rx.RxScheduler;
 import pers.jay.wanandroid.widgets.PoemTextView;
 import pers.zjc.commonlibs.constant.PermissionConstants;
-import pers.zjc.commonlibs.util.ActivityUtils;
+import pers.zjc.commonlibs.ui.BasePagerAdapter;
 import pers.zjc.commonlibs.util.ImageUtils;
 import pers.zjc.commonlibs.util.PermissionUtils;
 import pers.zjc.commonlibs.util.StringUtils;
@@ -92,7 +89,6 @@ import static com.vondear.rxtool.RxPhotoTool.GET_IMAGE_FROM_PHONE;
 /**
  * @author ZJC
  */
-@RequiresApi(api = Build.VERSION_CODES.N)
 public class ContainerFragment extends BaseFragment<ContainerPresenter>
         implements ContainerContract.View {
 
@@ -120,8 +116,7 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
     NavigationView navigationView;
     @BindView(R.id.drawerLayout)
     DrawerLayout drawerLayout;
-    @BindView(R.id.tvPoem)
-    PoemTextView tvPoem;
+    private PoemTextView tvPoem;
 
     @Inject
     AppConfig appConfig;
@@ -135,9 +130,8 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
     private TextView tvRank;
     private CircleImageView ivAvatar;
     private int mStartType = 0;
-    private List<Fragment> fragmentList = new ArrayList<>();
     private String[] mTitles = { "首页", "知识体系", "公众号", "导航", "项目" };
-    private FragmentPagerAdapter fragmentPagerAdapter;
+    private BasePagerAdapter<String, Fragment> fragmentPagerAdapter;
 
     private long firstClick = 0L;
     private MainActivity mActivity;
@@ -184,18 +178,11 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
 
     @Override
     public void initData(@Nullable Bundle savedInstanceState) {
-        Timber.e("%s initData", this.getClass().getSimpleName());
         if (savedInstanceState != null) {
             if (savedInstanceState.getBoolean(Const.Key.SAVE_INSTANCE_STATE)) {
-                Timber.e("%s savedInstanceState", this.getClass().getSimpleName());
 
             }
         }
-        fragmentList.add(HomeFragment.newInstance());
-        fragmentList.add(KnowledgeFragment.newInstance());
-        fragmentList.add(WeixinFragment.newInstance());
-        fragmentList.add(NavFragment.newInstance());
-        fragmentList.add(ProjectFragment.newInstance());
         initView();
         loadMyCoin();
         // 诗词
@@ -232,7 +219,10 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
         tvUserName = headerView.findViewById(R.id.tvUserName);
         tvRank = headerView.findViewById(R.id.tvRank);
         ivAvatar = headerView.findViewById(R.id.ivAvatar);
-        ivAvatar.setBorderColor(ContextCompat.getColor(mContext, R.color.white));
+        tvPoem = headerView.findViewById(R.id.tvPoem);
+        // 隐藏掉 转到刷新header
+        tvPoem.setVisibility(View.GONE);
+        ivAvatar.setBorderColor(ContextCompat.getColor(mContext, R.color.base_bg_color));
         ivAvatar.setBorderWidth(5);
         ivAvatar.setOnClickListener(v -> openGallery());
         tvCoinCount = (TextView)navigationView.getMenu().getItem(0).getActionView();
@@ -247,6 +237,9 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
                     Fragment fragment = MyCoinFragment.newInstance();
                     fragment.setArguments(bundle);
                     mActivity.switchFragment(fragment);
+                    break;
+                case R.id.nav_share:
+                    mActivity.switchFragment(MySharesFragment.newInstance());
                     break;
                 case R.id.nav_collection:
                     mActivity.switchFragment(CollectionFragment.newInstance());
@@ -277,7 +270,12 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
             return true;
         });
         //        setDrawerToggle();
-        ivRank.setOnClickListener(v -> switchToRankPage());
+        ivRank.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchToRankPage();
+            }
+        });
         tvUserName.setOnClickListener(v -> {
             if (!isLogin()) {
                 mActivity.switchFragment(LoginFragment.newInstance());
@@ -418,7 +416,6 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
         Observable<Bitmap> observable = Observable.create(new ObservableOnSubscribe<Bitmap>() {
             @Override
             public void subscribe(ObservableEmitter<Bitmap> emitter) throws Exception {
-                Timber.e("subscribe当前线程：%s", Thread.currentThread().getName());
                 Bitmap source = ImageUtils.getBitmap(file);
                 if (source == null) {
                     emitter.onError(new Throwable("Bitmap转换失败"));
@@ -535,13 +532,13 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
                 case R.id.nav_home:
                     viewPager.setCurrentItem(0);
                     break;
-                case R.id.nav_structure:
+                case R.id.nav_wenda:
                     viewPager.setCurrentItem(1);
                     break;
                 case R.id.nav_public:
                     viewPager.setCurrentItem(2);
                     break;
-                case R.id.nav_navigation:
+                case R.id.nav_structure:
                     viewPager.setCurrentItem(3);
                     break;
                 case R.id.navigation_project:
@@ -552,17 +549,21 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
             }
             return false;
         });
-        bottomNav.setOnNavigationItemReselectedListener(menuItem -> slideToTop());
+        bottomNav.setOnNavigationItemReselectedListener(menuItem -> slideToTop(true));
     }
+
 
     private void initFloatingButton() {
-        fabTop.setOnClickListener(v -> slideToTop());
+        fabTop.setOnClickListener(v -> slideToTop(false));
     }
 
-    private void slideToTop() {
+    private void slideToTop(boolean refresh) {
         int pos = viewPager.getCurrentItem();
-        Fragment fragment = fragmentPagerAdapter.getItem(pos);
+        Fragment fragment = fragmentPagerAdapter.getFragment(pos);
         if (fragment instanceof ScrollTopListener) {
+            if (refresh) {
+                ((ScrollTopListener)fragment).scrollToTopRefresh();
+            }
             ((ScrollTopListener)fragment).scrollToTop();
         }
     }
@@ -570,17 +571,18 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
     private void initViewPager() {
         // 按需设置viewPager预加载fragment数量，此处有5个界面，设置预加载4个，结合Fragment的懒加载，只预加载视图，不加载数据
         viewPager.setOffscreenPageLimit(4);
-        fragmentPagerAdapter = new FragmentPagerAdapter(getFragmentManager()) {
-            @Override
-            public Fragment getItem(int i) {
-                return fragmentList.get(i);
-            }
+        fragmentPagerAdapter = new BasePagerAdapter<>(getFragmentManager(),
+                new BasePagerAdapter.PagerFragCreator<String, Fragment>() {
+                    @Override
+                    public Fragment createFragment(String data, int position) {
+                        return createMainFragments(position);
+                    }
 
-            @Override
-            public int getCount() {
-                return fragmentList.size();
-            }
-        };
+                    @Override
+                    public String createTitle(String data) {
+                        return data;
+                    }
+                });
         viewPager.setAdapter(fragmentPagerAdapter);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -600,6 +602,24 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
 
             }
         });
+        // 绑定数据
+        fragmentPagerAdapter.setData(Arrays.asList(mTitles));
+    }
+
+    private Fragment createMainFragments(int position) {
+        switch (position) {
+            case 0:
+            default:
+                return HomeFragment.newInstance();
+            case 1:
+                return QAFragment.newInstance();
+            case 2:
+                return WeixinFragment.newInstance();
+            case 3:
+                return StructureFragment.newInstance();
+            case 4:
+                return ProjectFragment.newInstance();
+        }
     }
 
     public void setToolbar(String title) {
@@ -655,18 +675,18 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
     /**
      * Token过期,重新登录
      */
-    @Subscriber
-    public void onTokenExpiredEvent(Event event) {
-        if (null != event) {
-            if (event.getEventCode() == Const.EventCode.LOGIN_EXPIRED && mContext.equals(
-                    ActivityUtils.getTopActivity())) {
-                showMessage(getString(R.string.error_login_expired));
-                if (mContext instanceof MainActivity) {
-                    mActivity.switchFragment(LoginFragment.newInstance());
-                }
-            }
-        }
-    }
+//    @Subscriber
+//    public void onTokenExpiredEvent(Event event) {
+//        if (null != event) {
+//            if (event.getEventCode() == Const.EventCode.LOGIN_EXPIRED && mContext.equals(
+//                    ActivityUtils.getTopActivity())) {
+//                showMessage(getString(R.string.error_login_expired));
+//                if (mContext instanceof MainActivity) {
+//                    mActivity.switchFragment(LoginFragment.newInstance());
+//                }
+//            }
+//        }
+//    }
 
     /**
      * 登录成功
@@ -722,9 +742,12 @@ public class ContainerFragment extends BaseFragment<ContainerPresenter>
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        Timber.e("%s 保存状态", this.getClass().getSimpleName());
         // 意外销毁时（屏幕方向切换、颜色模式改变等）保存状态
         outState.putBoolean(Const.Key.SAVE_INSTANCE_STATE, true);
         super.onSaveInstanceState(outState);
+    }
+
+    public void switchToHome() {
+        viewPager.setCurrentItem(1);
     }
 }

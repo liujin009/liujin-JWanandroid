@@ -11,12 +11,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.jess.arms.base.BaseFragment;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
+import com.like.LikeButton;
 
 import org.simple.eventbus.Subscriber;
 
@@ -38,6 +38,7 @@ import pers.jay.wanandroid.mvp.ui.activity.X5WebActivity;
 import pers.jay.wanandroid.mvp.ui.adapter.ArticleAdapter;
 import pers.jay.wanandroid.utils.RvScrollTopUtils;
 import pers.zjc.commonlibs.util.ToastUtils;
+import timber.log.Timber;
 
 import static com.jess.arms.utils.Preconditions.checkNotNull;
 
@@ -105,9 +106,16 @@ public class SearchResultFragment extends BaseFragment<SearchResultPresenter>
             page++;
             mPresenter.search(page, mSearchKey, false);
         }, mRecyclerView);
-        adapter.setOnItemChildClickListener((adapter, view, position) -> {
-            Article article = (Article)adapter.getData().get(position);
-            mPresenter.collectArticle(article, view, position);
+        adapter.setLikeListener(new ArticleAdapter.LikeListener() {
+            @Override
+            public void liked(Article item, int adapterPosition) {
+                mPresenter.collectArticle(item, adapterPosition);
+            }
+
+            @Override
+            public void unLiked(Article item, int adapterPosition) {
+                mPresenter.collectArticle(item, adapterPosition);
+            }
         });
         fabTop.show();
         fabTop.setOnClickListener(v -> RvScrollTopUtils.smoothScrollTop(mRecyclerView));
@@ -186,13 +194,12 @@ public class SearchResultFragment extends BaseFragment<SearchResultPresenter>
     }
 
     @Override
-    public void updateCollectStatus(boolean collect, Article item, View view, int position) {
+    public void updateCollectStatus(boolean collect, Article item, int position) {
         for (Article article : adapter.getData()) {
             if (article.equals(item)) {
                 article.setCollect(collect);
             }
         }
-        adapter.loadAnim((ImageView)view, collect);
         adapter.notifyItemChanged(position);
     }
 
@@ -226,4 +233,13 @@ public class SearchResultFragment extends BaseFragment<SearchResultPresenter>
         adapter.openLoadAnimation(type);
     }
 
+    @Override
+    public void onCollectSuccess(Article article, int position) {
+
+    }
+
+    @Override
+    public void onCollectFail(Article article, int position) {
+        adapter.restoreLike(position);
+    }
 }

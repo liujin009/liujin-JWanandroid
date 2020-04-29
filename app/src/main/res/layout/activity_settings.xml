@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/base_bg_color">
     
     <include layout="@layout/include_toolbar"/>
     
@@ -24,7 +25,7 @@
             android:layout_weight="1"
             android:singleLine="true"
             android:text="暗色模式"
-            android:textColor="@color/black"
+            android:textColor="@color/text_color_reverse"
             android:textSize="15sp" />
         
         <TextView
@@ -65,7 +66,7 @@
             android:layout_weight="1"
             android:singleLine="true"
             android:text="列表动画"
-            android:textColor="@color/black"
+            android:textColor="@color/text_color_reverse"
             android:textSize="15sp" />
         
         <TextView
@@ -106,7 +107,7 @@
             android:layout_weight="1"
             android:singleLine="true"
             android:text="检查更新"
-            android:textColor="@color/black"
+            android:textColor="@color/text_color_reverse"
             android:textSize="15sp" />
         
         <TextView

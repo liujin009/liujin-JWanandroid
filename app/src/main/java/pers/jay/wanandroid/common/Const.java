@@ -11,7 +11,8 @@ public interface Const {
     interface Url {
         String DAILY_BING = "http://cn.bing.com/th?id=OHR.BourgesAerial_ROW9185097510_1920x1080.jpg&rf=LaDigue_1920x1081920x1080.jpg";
         String DAILY_BING_1  = "https://api.xygeng.cn/Bing";
-        String DAILY_BING_GUOLIN  = "http://guolin.tech/api/bing_pic";
+        String DAILY_BING_GUOLIN = "http://guolin.tech/api/bing_pic";
+        String GUOLIN = "http://guolin.tech/";
         String WAN_ANDROID = "https://www.wanandroid.com/";
         String GITHUB = "https://api.github.com/";
         String ABOUT_US = WAN_ANDROID + "about";
@@ -36,6 +37,8 @@ public interface Const {
         String KEY_SEGMENTFAULT = "segmentfault";
         String KEY_163 = "163.com";
         String KEY_GITHUB = "github.com";
+
+        String BLANK = "about:blank";
     }
 
     interface HttpConst {
@@ -72,6 +75,7 @@ public interface Const {
         String KEY_START_TYPE = "KEY_START_TYPE";
         String KEY_MY_COIN = "KEY_MY_COIN";
         String SAVE_INSTANCE_STATE = "SAVE_INSTANCE_STATE";
+        String KEY_USER_ID = "KEY_USER_ID";
     }
 
     interface Type {
@@ -94,6 +98,9 @@ public interface Const {
         int CHANGE_RV_ANIM = 5;
         int COLLECT_ARTICLE = 6;
         int CHANGE_UI_MODE = 7;
+        int SHARE_SUCCESS = 8;
+        int LOGIN_RETURN = 9;
+        int SIGN_SUCCESS = 10;
     }
 
     @SuppressLint("SimpleDateFormat")

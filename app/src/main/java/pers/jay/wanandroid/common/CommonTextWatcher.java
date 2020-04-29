@@ -1,6 +1,5 @@
 package pers.jay.wanandroid.common;
 
-import android.text.Editable;
 import android.text.TextWatcher;
 
 public abstract class CommonTextWatcher implements TextWatcher {
@@ -17,12 +16,5 @@ public abstract class CommonTextWatcher implements TextWatcher {
     public void onTextChanged(CharSequence s, int start, int before, int count) {
 
     }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-        textChanged(s);
-    }
-
-    public abstract void textChanged(Editable s);
 
 }

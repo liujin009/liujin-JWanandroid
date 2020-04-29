@@ -19,6 +19,7 @@ import pers.jay.wanandroid.common.Const;
 import pers.jay.wanandroid.common.JApplication;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 import timber.log.Timber;
 
 /**
@@ -46,6 +47,7 @@ public class NetWorkManager {
                 .baseUrl(Const.Url.WAN_ANDROID)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create()) //使用rxjava
                 .addConverterFactory(GsonConverterFactory.create()) //使用Gson
+                .addConverterFactory(ScalarsConverterFactory.create()) //接收非json字符串
                 .client(mOkHttpClient)
                 .build();
     }
@@ -67,7 +69,7 @@ public class NetWorkManager {
 //        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         //这行必须加 不然默认不打印
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient.Builder builder = RetrofitUrlManager.getInstance().with(new OkHttpClient.Builder());
+        OkHttpClient.Builder builder = getOkHttpBuilder();
         // debug模式才打印
         if (BuildConfig.DEBUG) {
             builder.addInterceptor(interceptor);
@@ -84,6 +86,10 @@ public class NetWorkManager {
                           .addInterceptor(new DoraemonInterceptor())
                           .build();
         return mOkHttpClient;
+    }
+
+    public OkHttpClient.Builder getOkHttpBuilder() {
+        return RetrofitUrlManager.getInstance().with(new OkHttpClient.Builder());
     }
 
     public <T> T getApiService(Class<T> tClass) {

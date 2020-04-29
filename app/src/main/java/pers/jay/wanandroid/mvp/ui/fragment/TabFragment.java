@@ -1,19 +1,17 @@
 package pers.jay.wanandroid.mvp.ui.fragment;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 
+import com.classic.common.MultipleStatusView;
 import com.jess.arms.base.BaseLazyLoadFragment;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
@@ -36,21 +34,24 @@ import pers.jay.wanandroid.model.ArticleInfo;
 import pers.jay.wanandroid.model.Tab;
 import pers.jay.wanandroid.mvp.contract.TabContract;
 import pers.jay.wanandroid.mvp.presenter.TabPresenter;
+import pers.jay.wanandroid.mvp.ui.activity.MainActivity;
 import pers.jay.wanandroid.mvp.ui.activity.X5WebActivity;
 import pers.jay.wanandroid.mvp.ui.adapter.ArticleAdapter;
+import pers.jay.wanandroid.utils.RouterHelper;
 import pers.jay.wanandroid.utils.RvScrollTopUtils;
+import pers.jay.wanandroid.utils.SmartRefreshUtils;
 import pers.zjc.commonlibs.util.ToastUtils;
 import timber.log.Timber;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
-public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements TabContract.View, ScrollTopListener {
+public class TabFragment extends BaseLazyLoadFragment<TabPresenter>
+        implements TabContract.View, ScrollTopListener {
 
     @BindView(R.id.mRecyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.refreshLayout)
     SmartRefreshLayout refreshLayout;
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
+    @BindView(R.id.statusView)
+    MultipleStatusView statusView;
 
     private ArticleAdapter adapter;
     private List<Article> mArticles = new ArrayList<>();
@@ -61,6 +62,16 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
 
     public static TabFragment newInstance() {
         return new TabFragment();
+    }
+
+    public static Fragment create(Tab data, int position, int fromType) {
+        TabFragment fragment = new TabFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(Const.Key.KEY_TAB_FROM_TYPE, fromType);
+        bundle.putInt(Const.Key.KEY_TAB_CHILD_POSITION, position);
+        bundle.putParcelable(Const.Key.KEY_TAB_DATA, data);
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
@@ -81,7 +92,6 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
     }
 
     private void initData() {
-        Timber.e("initData");
         Bundle bundle = getArguments();
         if (bundle == null) {
             return;
@@ -89,7 +99,7 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
         fromType = bundle.getInt(Const.Key.KEY_TAB_FROM_TYPE);
         switch (fromType) {
             case Const.Type.TYPE_TAB_KNOWLEDGE:
-               initKnowledgeData(bundle);
+                initKnowledgeData(bundle);
                 break;
             case Const.Type.TYPE_TAB_WEIXIN:
             case Const.Type.TYPE_TAB_PROJECT:
@@ -103,14 +113,13 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
             showMessage("presenter is null");
             return;
         }
-        showLoading();
     }
 
     private void initKnowledgeData(Bundle bundle) {
         Tab child = bundle.getParcelable(Const.Key.KEY_TAB_DATA);
         int position = bundle.getInt(Const.Key.KEY_TAB_CHILD_POSITION, -1);
         if (child == null || position == -1) {
-            showMessage("Tab is null");
+            showMessage("参数错误");
             return;
         }
         cid = child.getId();
@@ -119,13 +128,14 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
     private void initWeixinData(Bundle bundle) {
         Tab child = bundle.getParcelable(Const.Key.KEY_TAB_DATA);
         if (child == null) {
-            showMessage("Tab is null");
+            showMessage("参数错误");
             return;
         }
         cid = child.getId();
     }
 
     private void refreshData() {
+        assert mPresenter != null;
         mPresenter.requestArticles(cid, 0, fromType);
     }
 
@@ -135,11 +145,9 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
         ArmsUtils.configRecyclerView(mRecyclerView, new LinearLayoutManager(mContext));
         mRecyclerView.setAdapter(adapter);
         // 开启越界回弹
-        refreshLayout.setEnableOverScrollBounce(true);
-        refreshLayout.setEnableOverScrollDrag(true);
-        refreshLayout.setEnableLoadMore(false);
-        refreshLayout.setEnableAutoLoadMore(false);
-        refreshLayout.setOnRefreshListener(refreshLayout -> refreshData());
+        SmartRefreshUtils.with(refreshLayout)
+                         .pureScrollMode()
+                         .setRefreshListener(this::refreshData);
         adapter.setOnLoadMoreListener(() -> {
             if ((pageCount != 0 && pageCount == page + 1)) {
                 adapter.loadMoreEnd();
@@ -152,9 +160,27 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
             mPresenter.requestArticles(cid, page, fromType);
         }, mRecyclerView);
         adapter.setOnItemClickListener((adapter, view, position) -> switchToWebPage(position));
-        adapter.setOnItemChildClickListener(
-                (adapter, view, position) -> mPresenter.collectArticle(
-                        (Article)adapter.getData().get(position), view, position));
+        adapter.setLikeListener(new ArticleAdapter.LikeListener() {
+            @Override
+            public void liked(Article item, int adapterPosition) {
+                mPresenter.collectArticle(item, adapterPosition);
+            }
+
+            @Override
+            public void unLiked(Article item, int adapterPosition) {
+                mPresenter.collectArticle(item, adapterPosition);
+            }
+        });
+        adapter.setOnItemChildClickListener((adapter, view, position) -> {
+            Article article  = this.adapter.getData().get(position);
+            switch (view.getId()) {
+                case R.id.tvAuthor:
+                    RouterHelper.switchToUserPage((MainActivity)getActivity(), article);
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
     private void switchToWebPage(int position) {
@@ -180,7 +206,8 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
         if (data.getCurPage() == 0) {
             mArticles = data.getDatas();
             adapter.replaceData(mArticles);
-        } else {
+        }
+        else {
             mArticles.addAll(data.getDatas());
             adapter.addData(data.getDatas());
             adapter.loadMoreComplete();
@@ -194,30 +221,29 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
 
     @Override
     protected void lazyLoadData() {
-        Timber.e("lazyLoadData cid"+ cid + " page" + page);
+        page = 0;
+        showLoading();
         refreshData();
     }
 
     @Override
     public void showLoading() {
-        progressBar.setVisibility(View.VISIBLE);
+        statusView.showLoading();
     }
 
     @Override
     public void hideLoading() {
-        progressBar.setVisibility(View.INVISIBLE);
+        statusView.showContent();
         refreshLayout.finishRefresh();
     }
 
-
     @Override
-    public void updateCollectStatus(boolean isCollect, Article item, View view, int position) {
+    public void updateCollectStatus(boolean isCollect, Article item, int position) {
         for (Article article : adapter.getData()) {
             if (article.equals(item)) {
                 article.setCollect(isCollect);
             }
         }
-        adapter.loadAnim((ImageView)view, isCollect);
         adapter.notifyItemChanged(position);
     }
 
@@ -280,5 +306,20 @@ public class TabFragment extends BaseLazyLoadFragment<TabPresenter> implements T
 
     private void loadAnimation(int type) {
         adapter.openLoadAnimation(type);
+    }
+
+    @Override
+    public void onCollectSuccess(Article article, int position) {
+
+    }
+
+    @Override
+    public void onCollectFail(Article article, int position) {
+        adapter.restoreLike(position);
+    }
+
+    @Override
+    public void scrollToTopRefresh() {
+        lazyLoadData();
     }
 }

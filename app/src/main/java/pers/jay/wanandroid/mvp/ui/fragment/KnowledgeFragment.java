@@ -46,7 +46,6 @@ public class KnowledgeFragment extends BaseLazyLoadFragment<KnowledgePresenter>
     ProgressBar progressBar;
 
     private KnowledgeAdapter adapter;
-    private List<Tab> mData = new ArrayList<>();
 
     public static KnowledgeFragment newInstance() {
         return new KnowledgeFragment();
@@ -67,6 +66,7 @@ public class KnowledgeFragment extends BaseLazyLoadFragment<KnowledgePresenter>
     @Override
     public void initData(@Nullable Bundle savedInstanceState) {
         initView();
+        mPresenter.requestTreeData();
     }
 
     @Override
@@ -95,9 +95,6 @@ public class KnowledgeFragment extends BaseLazyLoadFragment<KnowledgePresenter>
     }
 
     private void initRefreshLayout() {
-        StoreHouseHeader header = new StoreHouseHeader(mContext);
-        header.initWithString(getString(R.string.app_name));
-        refreshLayout.setRefreshHeader(header);
         refreshLayout.setEnableLoadMore(false);
         refreshLayout.setEnableAutoLoadMore(false);
         refreshLayout.setOnRefreshListener(refreshLayout -> mPresenter.requestTreeData());
@@ -139,7 +136,6 @@ public class KnowledgeFragment extends BaseLazyLoadFragment<KnowledgePresenter>
 
     @Override
     public void showTreeData(List<Tab> tabs) {
-        this.mData = tabs;
         adapter.replaceData(tabs);
         adapter.notifyDataSetChanged();
     }
@@ -160,4 +156,8 @@ public class KnowledgeFragment extends BaseLazyLoadFragment<KnowledgePresenter>
         RvScrollTopUtils.smoothScrollTop(recyclerView);
     }
 
+    @Override
+    public void scrollToTopRefresh() {
+        lazyLoadData();
+    }
 }

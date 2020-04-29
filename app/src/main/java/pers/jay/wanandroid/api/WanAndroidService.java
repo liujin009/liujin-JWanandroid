@@ -255,22 +255,24 @@ public interface WanAndroidService {
      * 可能出现返回列表数据<每页数据，因为有自见的文章被过滤掉了。
      */
     @GET("/user_article/list/{page}/json")
-    Observable<WanAndroidResponse<PageInfo<Article>>> squareArticles(@Path("page") int page);
+    Observable<WanAndroidResponse<ArticleInfo>> squareArticles(@Path("page") int page);
 
     /**
      * 10.2 分享人对应列表数据
      * https://www.wanandroid.com/user/2/share_articles/1/json
+     * 用户id: 拼接在url上
+     * 页码拼接在url上从1开始
      */
-    @GET("/user/2/share_articles/{page}/json")
-    Observable<WanAndroidResponse<ShareUserArticles>> shareUserArticles(@Path("page") int page);
+    @GET("/user/{userId}/share_articles/{page}/json")
+    Observable<WanAndroidResponse<ShareUserArticles>> shareUserArticles(@Path("userId") long userId, @Path("page") int page);
 
     /**
      * 10.3 自己的分享的文章列表
      * 如果你登陆了，可以直接点击查看自己分享的列表：
      * https://wanandroid.com/user/lg/private_articles/1/json
      */
-    @GET("user/lg/private_articles/1/json")
-    Observable<WanAndroidResponse<ShareUserArticles>> privateArticles();
+    @GET("user/lg/private_articles/{page}/json")
+    Observable<WanAndroidResponse<ShareUserArticles>> privateArticles(@Path("page") int page);
 
     /**
      * 10.4 删除自己分享的文章
@@ -289,7 +291,7 @@ public interface WanAndroidService {
      * 	注意需要登录后查看，如果为CSDN，简书等链接会直接通过审核，在对外的分享文章列表中展示。
      * 否则只能在自己的分享文章列表查看，见10.3。
      */
-    @POST("lg/user_article/add/js")
+    @POST("lg/user_article/add/json")
     @FormUrlEncoded
     Observable<WanAndroidResponse> shareArticle(@Field("title") String title, @Field("link") String link);
 
@@ -379,5 +381,12 @@ public interface WanAndroidService {
     @GET("lg/todo/v2/list/{page}/json")
     Observable<WanAndroidResponse<PageInfo<Todo>>> todoList(@Path("page") int page, @QueryMap LinkedHashMap<String, Object> map);
 
+    /**
+     * 问答列表
+     * @param page 页码从1开始
+     * @return
+     */
+    @GET("wenda/list/{page}/json")
+    Observable<WanAndroidResponse<ArticleInfo>> qaList(@Path("page") int page);
 
 }
